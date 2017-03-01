@@ -4,22 +4,20 @@ import serial
 import argparse
 import re
 
-from threading import Thread
-from queue import Queue
 from time import sleep
+from threading import Thread
 
 from prompt_toolkit import prompt
 from pygments.lexers import LuaLexer
 from prompt_toolkit.layout.lexers import PygmentsLexer
 from prompt_toolkit.history import FileHistory
 
-history = FileHistory('nodemcu-repl_history')
+history = FileHistory('.nodemcu-repl_history')
 
-queue = Queue()
 loop_condition = True
 
 NO_ECHO = 'uart.setup(0, 115200, 8, uart.PARITY_NONE, uart.STOPBITS_1, 0)'
-queue.put(NO_ECHO)
+
 
 def do_help():
     help = \
@@ -46,15 +44,15 @@ def do_copy(command):
     try:
         file = open(source, 'r')
         cmd = 'file.open("%s", "w")' % destination
-        queue.put(cmd)
+        send(cmd)
 
         for line in file:
           cmd = 'file.writeline([==[%s]==])' % line.strip()
-          queue.put(cmd)
+          send(cmd)
 
         file.close()
-        queue.put('file.close()')
-        queue.put('print()')
+        send('file.close()')
+        send('print()')
 
     except:
         sys.stdout.write('Error: Could not open input file "%s".\n' % source)
@@ -64,15 +62,10 @@ def do_copy(command):
 
 def do_list():
     cmd = 'for k,v in pairs(file.list()) do print(string.format("%4d %s", v, k)) end'
-    queue.put(cmd)
+    send(cmd)
 
 
-def user_loop(queue):
-    global loop_condition
-
-    sys.stdout.write('NodeMCU REPL\n')
-    sys.stdout.write('Enter ".help" for usage hints.\n')
-
+def user_loop():
     while loop_condition:
 
         try:
@@ -93,27 +86,25 @@ def user_loop(queue):
                     sys.stdout.flush()
 
             else:
-              queue.put(command)
+                send(command)
 
         except KeyboardInterrupt:
             do_exit()
 
 
-def node_loop(queue):
+def node_loop():
     while loop_condition:
-
-        if ser.in_waiting > 0:
-            response = ser.read(ser.in_waiting)
-            sys.stdout.write(response.decode('utf-8'))
-            sys.stdout.flush()
-
-        if not queue.empty():
-            command = queue.get() + '\n'
-            ser.write(command.encode('utf-8'))
-
-        sleep(0.3)
+        response = ser.read()
+        sys.stdout.write(response.decode('utf-8'))
+        sys.stdout.flush()
 
     ser.close()
+
+
+def send(command):
+    command = command + '\n'
+    ser.write(command.encode('utf-8'))
+    sleep(0.1)
 
 
 if __name__ == "__main__":
@@ -128,8 +119,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ser = serial.Serial(args.port, args.baud)
-    ser.timeout = 3
-    ser.interCharTimeout = 3
+    ser.timeout = 1
 
-    Thread(target=node_loop, args=(queue,)).start()
-    Thread(target=user_loop, args=(queue,)).start()
+    sys.stdout.write('NodeMCU REPL\n')
+    sys.stdout.write('Enter ".help" for usage hints.\n')
+    sys.stdout.write('> ')
+    sys.stdout.flush()
+
+    send(';') # This closes any previous unfinished chunk
+    send(NO_ECHO) # It is nicer without NodeMCU echo
+    ser.reset_input_buffer() # Cleans the clutter generated earlier
+
+    Thread(target=node_loop).start()
+    user_loop()
