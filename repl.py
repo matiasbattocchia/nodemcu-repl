@@ -1,38 +1,25 @@
+import os
 import sys
 import serial
+import argparse
 import re
-from   os.path import basename
 
 from threading import Thread
 from queue import Queue
 from time import sleep
 
-PORT = '/dev/ttyUSB0'
-BAUD = 115200
+from prompt_toolkit import prompt
+from pygments.lexers import LuaLexer
+from prompt_toolkit.layout.lexers import PygmentsLexer
+from prompt_toolkit.history import FileHistory
 
-ser = serial.Serial(PORT, BAUD)#, rtscts=True, dsrdtr=True)
+history = FileHistory('nodemcu-repl_history')
 
-# Keeps things working, if following conections are made:
-# RTS = CH_PD (i.e reset)
-# DTR = GPIO0
-
-#ser.rts = True
-#ser.dtr = True
-
-ser.timeout = 3
-ser.interCharTimeout = 3
-
-queue  = Queue()
+queue = Queue()
 loop_condition = True
-
-# CLEAR = '\n'
-# queue.put(CLEAR)
 
 NO_ECHO = 'uart.setup(0, 115200, 8, uart.PARITY_NONE, uart.STOPBITS_1, 0)'
 queue.put(NO_ECHO)
-
-# puts: put string --> putt: put table
-PUTT = 'for k,v in pairs(t) do print(k,v) end'
 
 def do_help():
     help = \
@@ -49,7 +36,7 @@ def do_help():
 
 def do_copy(command):
     source = command.split(' ')[-1]
-    destination = basename(source)
+    destination = os.path.basename(source)
 
     try:
         file = open(source, 'rt')
@@ -83,16 +70,16 @@ def user_loop(queue):
 
     while loop_condition:
 
-        command = sys.stdin.readline().rstrip()
+        command = prompt('', lexer=PygmentsLexer(LuaLexer), history=history)
 
         # Intercept commands starting with a dot.
         if re.match('\\.', command):
             command = command.lstrip('.')
 
-            if   re.match('e|q', command):       loop_condition = False
-            elif re.match('h', command):         do_help()
-            elif re.match('cp|copy', command):   do_copy(command)
-            elif re.match('ls|list', command):   do_list()
+            if   re.match('e|q', command):     loop_condition = False
+            elif re.match('h', command):       do_help()
+            elif re.match('cp|copy', command): do_copy(command)
+            elif re.match('ls|list', command): do_list()
             #elif re.match('rm|remove', command): do_remove(command)
             else:
                 sys.stdout.write('Error: Command not understood.\n')
@@ -126,5 +113,19 @@ def node_loop(queue):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='NodeMCU serial client')
+
+    parser.add_argument('-p', '--port', default='/dev/ttyUSB0', \
+                        help='Device name, default /dev/ttyUSB0')
+
+    parser.add_argument('-b', '--baud', default=115200, \
+                        help='Baudrate, default 115200')
+
+    args = parser.parse_args()
+
+    ser = serial.Serial(args.port, args.baud)
+    ser.timeout = 3
+    ser.interCharTimeout = 3
+
     Thread(target=node_loop, args=(queue,)).start()
     Thread(target=user_loop, args=(queue,)).start()
