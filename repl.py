@@ -44,7 +44,7 @@ def do_copy(command):
     destination = os.path.basename(source)
 
     try:
-        file = open(source, 'rt')
+        file = open(source, 'r')
         cmd = 'file.open("%s", "w")' % destination
         queue.put(cmd)
 
@@ -103,21 +103,16 @@ def node_loop(queue):
     while loop_condition:
 
         if ser.in_waiting > 0:
-            response = ser.read(ser.in_waiting).decode('utf-8')
-            sys.stdout.write(response)
+            response = ser.read(ser.in_waiting)
+            sys.stdout.write(response.decode('utf-8'))
             sys.stdout.flush()
 
         if not queue.empty():
-            command = queue.get()
-
-            command = command + '\n'
-            # command = 'print(' + command + ')\n'
-
+            command = queue.get() + '\n'
             ser.write(command.encode('utf-8'))
 
         sleep(0.3)
 
-    ser.flush()
     ser.close()
 
 
