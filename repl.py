@@ -34,6 +34,11 @@ def do_help():
     sys.stdout.flush()
 
 
+def do_exit():
+    global loop_condition
+    loop_condition = False
+
+
 def do_copy(command):
     source = command.split(' ')[-1]
     destination = os.path.basename(source)
@@ -70,24 +75,28 @@ def user_loop(queue):
 
     while loop_condition:
 
-        command = prompt('', lexer=PygmentsLexer(LuaLexer), history=history)
+        try:
+            command = prompt('', lexer=PygmentsLexer(LuaLexer), history=history)
 
-        # Intercept commands starting with a dot.
-        if re.match('\\.', command):
-            command = command.lstrip('.')
+            # Intercept commands starting with a dot.
+            if re.match('\\.', command):
+                command = command.lstrip('.')
 
-            if   re.match('e|q', command):     loop_condition = False
-            elif re.match('h', command):       do_help()
-            elif re.match('cp|copy', command): do_copy(command)
-            elif re.match('ls|list', command): do_list()
-            #elif re.match('rm|remove', command): do_remove(command)
+                if   re.match('e|q', command):     do_exit()
+                elif re.match('h', command):       do_help()
+                elif re.match('cp|copy', command): do_copy(command)
+                elif re.match('ls|list', command): do_list()
+                #elif re.match('rm|remove', command): do_remove(command)
+                else:
+                    sys.stdout.write('Error: Command not understood.\n')
+                    sys.stdout.write('> ')
+                    sys.stdout.flush()
+
             else:
-                sys.stdout.write('Error: Command not understood.\n')
-                sys.stdout.write('> ')
-                sys.stdout.flush()
+              queue.put(command)
 
-        else:
-          queue.put(command)
+        except KeyboardInterrupt:
+            do_exit()
 
 
 def node_loop(queue):
