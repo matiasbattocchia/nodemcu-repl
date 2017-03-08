@@ -1,7 +1,7 @@
 # NodeMCU REPL
 
 This is a tool to ease the development on the ESP8266 running the
-[NodeMCU firmware](https://github.com/nodemcu/nodemcu-firmware)
+[NodeMCU firmware](https://github.com/nodemcu/nodemcu-firmware).
 It is a serial communication client adapted to the NodeMCU's
 interpreter plus a file loader.
 
@@ -11,7 +11,7 @@ syntax highlighting.
 I was constantly alternating between my terminal emulator to monitor the
 device and [Luatool](https://github.com/4refr0nt/luatool) to upload files
 to it, both of which bind on the serial port and cannot run simultaneously.
-NodeMCU REPL addresses this issue.
+NodeMCU REPL addresses this issue in less than 150 lines of code.
 
 ## Requirements
 
