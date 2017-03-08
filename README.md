@@ -23,7 +23,7 @@ If in need of multiple versions of Python I could not recommend
 you more [pyenv](https://github.com/pyenv/pyenv).
 
 For installing Python modules the preferred way is through
-[pip](https://pip.pypa.io/en/stable) or just use you system's
+[pip](https://pip.pypa.io/en/stable) or just use your system's
 package manager.
 
 ## Installing
@@ -45,10 +45,13 @@ $ python repl.py --port /dev/ttyUSB0 --baud 115200
 
 ### Dot commands
 
+Inside the REPL commands starting with a dot are intercepted
+instead of being handled to the device.
+
 **Upload** a local file to the device; it will be stored with the same name.
 
 ```lua
-> .copy '/path/to/init.lua'
+> .copy init.lua
 ```
 
 **List** size and files stored in the device.
@@ -59,8 +62,15 @@ $ python repl.py --port /dev/ttyUSB0 --baud 115200
  100 main.lua
 ```
 
-For other actions related to files like **delete** or **rename**,
-use the NodeMCU API.
+For other actions related to files like **delete** or **rename**, use the
+[file module](http://nodemcu.readthedocs.io/en/master/en/modules/file)
+functions.
+
+**Close** the REPL.
+
+```lua
+> .exit
+```
 
 ### Inspecting
 
@@ -76,8 +86,8 @@ everytime, just prefix an equals sign, this way:
 ### Important
 
 NodeMCU REPL will disable the UART module echo at start and will re-enable
-at exit. If a disconnection happens in-between this will not occur.
-In that case, you can re-start the REPL and try to exit normally.
+it at exit. If a disconnection happens in-between this will not occur;
+in that case, you can re-start the REPL and try to exit normally.
 
 ## TODO
 
