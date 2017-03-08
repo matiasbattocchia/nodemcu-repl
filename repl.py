@@ -16,6 +16,7 @@ history = FileHistory('.nodemcu-repl_history')
 loop_condition = True
 
 NO_ECHO = 'uart.setup(0, 115200, 8, uart.PARITY_NONE, uart.STOPBITS_1, 0)'
+ECHO    = 'uart.setup(0, 115200, 8, uart.PARITY_NONE, uart.STOPBITS_1, 1)'
 
 
 def do_help():
@@ -129,4 +130,6 @@ if __name__ == "__main__":
     Thread(target=device_loop).start()
     user_loop()
 
+    send(';')
+    send(ECHO) # back to normality
     ser.close()

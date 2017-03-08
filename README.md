@@ -1,7 +1,8 @@
 # NodeMCU REPL
 
-This is a tool to ease the development on the ESP8266 running the NodeMCU
-firmware. It is a serial communication client adapted to the NodeMCU's
+This is a tool to ease the development on the ESP8266 running the
+[NodeMCU firmware](https://github.com/nodemcu/nodemcu-firmware)
+It is a serial communication client adapted to the NodeMCU's
 interpreter plus a file loader.
 
 It features **readline**-like support: command history, inline input editing,
@@ -10,6 +11,7 @@ syntax highlighting.
 I was constantly alternating between my terminal emulator to monitor the
 device and [Luatool](https://github.com/4refr0nt/luatool) to upload files
 to it, both of which bind on the serial port and cannot run simultaneously.
+NodeMCU REPL addresses this issue.
 
 ## Requirements
 
@@ -46,13 +48,15 @@ $ python repl.py --port /dev/ttyUSB0 --baud 115200
 **Upload** a local file to the device; it will be stored with the same name.
 
 ```lua
-> .copy '/path/to/file'
+> .copy '/path/to/init.lua'
 ```
 
-**List** files stored in the device.
+**List** size and files stored in the device.
 
 ```Lua
 > .list
+  30 init.lua
+ 100 main.lua
 ```
 
 For other actions related to files like **delete** or **rename**,
@@ -62,12 +66,18 @@ use the NodeMCU API.
 
 NodeMCU interpreter does not print evaluated statements unless otherwise
 stated. There is a Lua trick that will prevent you from writing `print()`
-everytime, just prefix an equals sign like this:
+everytime, just prefix an equals sign, this way:
 
 ```lua
 > =wifi.sta.status()
 5
 ```
+
+### Important
+
+NodeMCU REPL will disable the UART module echo at start and will re-enable
+at exit. If a disconnection happens in-between this will not occur.
+In that case, you can re-start the REPL and try to exit normally.
 
 ## TODO
 
