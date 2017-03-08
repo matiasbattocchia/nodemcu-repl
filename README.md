@@ -17,24 +17,31 @@ to it, both of which bind on the serial port and cannot run simultaneously.
 * [pySerial](https://github.com/pyserial/pyserial)
 * [Prompt toolkit](https://github.com/jonathanslenders/python-prompt-toolkit)
 
-If need multiple versions of Python I could not recommend
+If in need of multiple versions of Python I could not recommend
 you more [pyenv](https://github.com/pyenv/pyenv).
 
 For installing Python modules the preferred way is through
-[pip](https://pip.pypa.io/en/stable).
+[pip](https://pip.pypa.io/en/stable) or just use you system's
+package manager.
 
 ## Installing
 
-Clone this repo, use the script.
+Clone/download this repo, use the script. You will need root
+privileges or to belong to the `uucp` group.
 
 Also `chmod +x nodemcu-repl/repl.py` and
-`export PATH=$PATH:~/nodemcu-repl` if you want to.
+`export PATH=$PATH:~/nodemcu-repl` if you want the
+touch and feel of a command.
 
 ## Using
 
 ```sh
-$ python repl.py
+$ python repl.py --port /dev/ttyUSB0 --baud 115200
 ```
+
+**Port** and **baud** are optional and default to the aforementioned values.
+
+### Dot commands
 
 **Upload** a local file to the device; it will be stored with the same name.
 
@@ -42,7 +49,7 @@ $ python repl.py
 > .copy '/path/to/file'
 ```
 
-**List** files in the device.
+**List** files stored in the device.
 
 ```Lua
 > .list
@@ -50,6 +57,8 @@ $ python repl.py
 
 For other actions related to files like **delete** or **rename**,
 use the NodeMCU API.
+
+### Inspecting
 
 NodeMCU interpreter does not print evaluated statements unless otherwise
 stated. There is a Lua trick that will prevent you from writing `print()`
@@ -69,6 +78,9 @@ everytime, just prefix an equals sign like this:
 file **minifier** to reduce the size of uploaded Lua scripts.
 Harder than expected as it needs a revamp. Meanwhile, why not to strip
 comments?
+
+* Buffer overflow exception.
+* UTF-8 decoding error.
 
 ## Acknowledgments
 
