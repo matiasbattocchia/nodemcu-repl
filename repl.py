@@ -38,7 +38,8 @@ def do_exit():
 
 
 def do_copy(command):
-    source = command.split(' ')[-1]
+    command = command.split(' ')
+    source  = command[-1]
     destination = os.path.basename(source)
 
     try:
@@ -47,10 +48,17 @@ def do_copy(command):
             send(cmd)
 
             for line in file:
-                cmd = 'file.writeline([==[%s]==])' % line.strip()
+                line = line.strip()
+
+                if line[:2] == '--': continue # line is a comment, skip it
+
+                cmd = 'file.writeline([==[%s]==])' % line
                 send(cmd)
 
             send('file.close()')
+
+            if command[1] == 'do': send('dofile("%s")' % destination)
+
             send('print()')
 
     except:

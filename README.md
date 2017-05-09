@@ -92,15 +92,14 @@ in that case, you can re-start the REPL and try to exit normally.
 ## TODO
 
 * Autocompletion of NodeMCU API.
+
 * Human-readable representation of Lua tables
 ([see this](http://lua-users.org/wiki/TableSerialization)).
+
 * Make use of [LuaMinify](https://github.com/stravant/LuaMinify)
 file **minifier** to reduce the size of uploaded Lua scripts.
-Harder than expected as it needs a revamp. Meanwhile, why not to strip
-comments?
-
-* Buffer overflow exception.
-* UTF-8 decoding error.
+Harder than expected as it needs a revamp. **Meanwhile, the uploader
+leaves out comment lines**.
 
 ## Acknowledgments
 
