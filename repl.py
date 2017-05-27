@@ -100,7 +100,7 @@ def user_loop():
 def device_loop():
     while loop_condition:
         response = ser.read()
-        sys.stdout.write(response.decode('utf-8'))
+        sys.stdout.write(response.decode('utf-8', 'ignore'))
         sys.stdout.flush()
 
 
